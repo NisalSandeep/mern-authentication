@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 
 import { generateVerificationToken } from "../utils/generateVerificationToken.js";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
-import { sendVerificationEmail } from "../utils/emails.js";
+import { sendVerificationEmail, sendWelcomeEmail } from "../utils/emails.js";
 
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,10 +66,71 @@ export const signup = async (req, res) => {
   }
 };
 
+export const verifyEmail = async (req, res) => {
+  const { code } = req.body;
+
+  try {
+    const user = await User.findOne({
+      varificationToken: code,
+      varificationTokenExpiresAt: { $gt: Date.now() },
+    })
+
+    if(!user) {
+       return res.status(400).json({success: false, message: "Invalid or expired verification code" });
+    }
+
+    user.isVerified = true;
+    user.varificationToken = undefined;
+    user.varificationTokenExpiresAt = undefined;
+    
+    await user.save();
+
+    await sendWelcomeEmail(user.email, user.name);
+
+  }catch (error) {
+    console.error("Error verifying email:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    
+     if (!email || !password) {
+       return res.status(400).json({ message: "Email and password are required" });
+     }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return res
+        .status(400)
+        .json({ message: "Please provide a valid email address" });
+    }
+
+
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    if (!user.isVerified) {
+      return res.status(400).json({ message: "Please verify your email before logging in" });
+    }
+
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    
+
 
   }catch (error) {
 

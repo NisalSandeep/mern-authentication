@@ -23,3 +23,8 @@ export const sendVerificationEmail = async (email, verificationToken) => {
   }
 
 }
+
+
+export const sendWelcomeEmail = async (email, name) => {
+  const recipient = [{ email }];
+}
