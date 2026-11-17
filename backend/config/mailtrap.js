@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 dotenv.config({
   path: resolve(dirname(fileURLToPath(import.meta.url)), "../../.env"),
-});.
+});
 
 const ENDPOINT = process.env.MAILTRAP_ENDPOINT;
 const TOKEN = process.env.MAILTRAP_TOKEN;
