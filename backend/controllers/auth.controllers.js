@@ -137,13 +137,32 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    
+    generateTokenAndSetCookie(res, user._id);
 
+    user.lastLogin = new Date();
 
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: {
+        ...user._doc,
+        password: undefined, // Exclude password from the response
+        varificationToken: undefined, // Exclude verification token from the response
+        varificationTokenExpiresAt: undefined, // Exclude verification token expiration from the response
+      },
+    });
+
+  
   }catch (error) {
-
+    console.error("Error during login:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 
 };
 
-export const logout = async (req, res) => {};
+export const logout = async (req, res) => {
+  res.clearCookie("token")
+  res.status(200).json({ success: true, message: "Logged out successfully" })
+};
