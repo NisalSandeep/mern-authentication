@@ -87,6 +87,14 @@ export const verifyEmail = async (req, res) => {
 
     await sendWelcomeEmail(user.email, user.name);
 
+
+    res.status(200).json({ success: true, message: "Email verified successfully", user: {
+      ...user._doc,
+      password: undefined, // Exclude password from the response
+      varificationToken: undefined, // Exclude verification token from the response
+      varificationTokenExpiresAt: undefined, // Exclude verification token expiration from the response
+    } });
+
   }catch (error) {
     console.error("Error verifying email:", error);
     return res.status(500).json({ message: "Internal server error" });
