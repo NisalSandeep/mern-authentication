@@ -34,7 +34,7 @@ function SignUpPage() {
             <Input icon={Mail} type='email'placeholder='Email Address' value={email} onChange={(e) => setEmail(e.target.value)} />
             <Input icon={Lock} type='password'placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
 	
-            <PasswordStrengthMeter />
+            <PasswordStrengthMeter password={password} />
 
             <motion.button
 						className='mt-5 w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white 
